@@ -8,5 +8,6 @@ dist
 .env.local
 .env.*.local
 next-env.d.ts
+tsconfig.tsbuildinfo
 .vercel
 .turbo
