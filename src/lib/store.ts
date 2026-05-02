@@ -9,7 +9,9 @@ interface State {
   projects: Record<string, Project>;
   order: string[];
   createProject: (name: string, oneLiner: string, ideaDescription?: string) => string;
+  createDraftProject: (name: string, oneLiner: string, ideaDescription?: string) => string;
   createFromTemplate: (overrides: Partial<Project>) => string;
+  createDraftFromTemplate: (overrides: Partial<Project>) => string;
   deleteProject: (id: string) => void;
   updateProject: (id: string, patch: Partial<Project>) => void;
   patchDomain: <K extends keyof Project>(id: string, key: K, value: Project[K]) => void;
@@ -22,6 +24,7 @@ export function emptyProject(name: string, oneLiner: string, ideaDescription = "
   const now = new Date().toISOString();
   return {
     id: uid(),
+    listed: true,
     name,
     oneLiner,
     ideaDescription,
@@ -121,6 +124,13 @@ export function emptyProject(name: string, oneLiner: string, ideaDescription = "
       buildVsBuy: "",
     },
     systemDesign: {
+      architecturePattern: "modular-monolith",
+      authArchitecture: "managed-oidc",
+      deploymentTopology: "single-region",
+      tradeoffAreas: [],
+      securityReviewAreas: ["identity", "authorization", "data-protection", "secrets", "audit"],
+      highLevelArchitectureNotes: "",
+      lowLevelArchitectureNotes: "",
       expectedUsersTotal: 0,
       dau: 0,
       mau: 0,
@@ -206,6 +216,25 @@ export function emptyProject(name: string, oneLiner: string, ideaDescription = "
   };
 }
 
+function withTemplateDefaults(base: Project, overrides: Partial<Project>, listed: boolean): Project {
+  // Domain blocks merge over defaults so older templates/projects keep
+  // newly-added optional fields without requiring a manual migration.
+  return {
+    ...base,
+    ...overrides,
+    systemDesign: { ...base.systemDesign, ...overrides.systemDesign },
+    ai: { ...base.ai, ...overrides.ai },
+    id: base.id,
+    listed,
+    createdAt: base.createdAt,
+    updatedAt: base.updatedAt,
+  };
+}
+
+function addToOrder(order: string[], id: string) {
+  return order.includes(id) ? order : [id, ...order];
+}
+
 export const useStore = create<State>()(
   persist(
     (set, get) => ({
@@ -219,24 +248,38 @@ export const useStore = create<State>()(
         }));
         return project.id;
       },
+      createDraftProject: (name, oneLiner, ideaDescription = "") => {
+        const project = {
+          ...emptyProject(name || "Untitled project", oneLiner || "", ideaDescription),
+          listed: false,
+        };
+        set((s) => ({
+          projects: { ...s.projects, [project.id]: project },
+        }));
+        return project.id;
+      },
       createFromTemplate: (overrides) => {
         const base = emptyProject(
           overrides.name || "Untitled project",
           overrides.oneLiner || "",
           overrides.ideaDescription || "",
         );
-        // Top-level merge — every domain block in `overrides` replaces the
-        // empty default wholesale. Templates supply complete domain blocks.
-        const project: Project = {
-          ...base,
-          ...overrides,
-          id: base.id,
-          createdAt: base.createdAt,
-          updatedAt: base.updatedAt,
-        };
+        const project = withTemplateDefaults(base, overrides, true);
         set((s) => ({
           projects: { ...s.projects, [project.id]: project },
           order: [project.id, ...s.order],
+        }));
+        return project.id;
+      },
+      createDraftFromTemplate: (overrides) => {
+        const base = emptyProject(
+          overrides.name || "Untitled project",
+          overrides.oneLiner || "",
+          overrides.ideaDescription || "",
+        );
+        const project = withTemplateDefaults(base, overrides, false);
+        set((s) => ({
+          projects: { ...s.projects, [project.id]: project },
         }));
         return project.id;
       },
@@ -250,16 +293,34 @@ export const useStore = create<State>()(
         set((s) => {
           const cur = s.projects[id];
           if (!cur) return s;
-          const next = { ...cur, ...patch, updatedAt: new Date().toISOString() };
-          return { projects: { ...s.projects, [id]: next } };
+          const isContentEdit = Object.keys(patch).some((key) => key !== "progress");
+          const next = {
+            ...cur,
+            ...patch,
+            listed: isContentEdit ? true : cur.listed,
+            updatedAt: new Date().toISOString(),
+          };
+          return {
+            projects: { ...s.projects, [id]: next },
+            order: isContentEdit ? addToOrder(s.order, id) : s.order,
+          };
         });
       },
       patchDomain: (id, key, value) => {
         set((s) => {
           const cur = s.projects[id];
           if (!cur) return s;
-          const next = { ...cur, [key]: value, updatedAt: new Date().toISOString() } as Project;
-          return { projects: { ...s.projects, [id]: next } };
+          const isContentEdit = key !== "progress";
+          const next = {
+            ...cur,
+            [key]: value,
+            listed: isContentEdit ? true : cur.listed,
+            updatedAt: new Date().toISOString(),
+          } as Project;
+          return {
+            projects: { ...s.projects, [id]: next },
+            order: isContentEdit ? addToOrder(s.order, id) : s.order,
+          };
         });
       },
       markStep: (id, step, status) => {
@@ -274,6 +335,7 @@ export const useStore = create<State>()(
         const copy: Project = {
           ...cur,
           id: uid(),
+          listed: true,
           name: `${cur.name} (copy)`,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -285,7 +347,7 @@ export const useStore = create<State>()(
         return copy.id;
       },
       importProject: (project) => {
-        const copy: Project = { ...project, id: uid(), updatedAt: new Date().toISOString() };
+        const copy: Project = { ...project, id: uid(), listed: true, updatedAt: new Date().toISOString() };
         set((s) => ({
           projects: { ...s.projects, [copy.id]: copy },
           order: [copy.id, ...s.order],
