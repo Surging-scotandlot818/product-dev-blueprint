@@ -1,22 +1,28 @@
-# Setup
+# Setup Guide
 
-This app is currently a client-side Next.js application. It does not call any live LLM, DeepAgents worker, database, auth provider, or third-party API at runtime.
+This guide reflects the app as it exists today. The current product is a client-side Next.js app that generates planning artifacts from deterministic TypeScript generators. It does **not** call DeepAgents, OpenAI, Anthropic, a database, or an auth provider at runtime.
 
-## Required Today
+## Current Runtime
 
-No API keys are required to run the current application locally or on Vercel.
+| Capability | Current implementation | API keys required today |
+|---|---|---:|
+| Intake wizard | Next.js App Router pages and React components | No |
+| Project storage | Browser `localStorage` via Zustand persist | No |
+| Document generation | Local TypeScript markdown/DOCX generators in `src/lib/generators` and `src/lib/docx.ts` | No |
+| HLD/LLD architecture output | Deterministic generator based on user inputs in `src/lib/generators/system-design.ts` | No |
+| DeepAgents content writer | Not wired into runtime yet | No |
+| Auth/accounts | Not implemented | No |
+| Database/shared projects | Not implemented | No |
 
-| Area | Required? | Notes |
-|---|---:|---|
-| OpenAI / Anthropic / other model provider | No | The shipped artifact generation is deterministic TypeScript, not live LLM generation. |
-| LangGraph DeepAgents | No | DeepAgents is documented as a future server-side runtime path, but is not wired into the current app. |
-| Database | No | Project data is stored in browser `localStorage`. |
-| Auth | No | There is no login system yet. |
-| Vercel env vars | No | Production deployment works with the linked Vercel project. |
+Required environment variables for the shipped app: **none**.
+
+## Prerequisites
+
+- Node.js 20 or newer. The repo includes `.nvmrc` with Node 20.
+- npm, using the checked-in `package-lock.json`.
+- Optional: Vercel CLI for manual deployments.
 
 ## Local Development
-
-Use Node 20 or newer.
 
 ```bash
 nvm use
@@ -30,40 +36,64 @@ Open:
 http://localhost:3000
 ```
 
-Useful checks:
+The app stores draft projects in the current browser only. Clearing site data or using the app's Settings page can remove local projects.
+
+## Local Checks
+
+Use these before opening a PR:
 
 ```bash
 npm run typecheck
 npm run build
 ```
 
-## Local Environment Files
+`npm run lint` exists in `package.json`, but this Next.js version no longer ships the old `next lint` command path in the same way. Treat `typecheck` and `build` as the required checks unless lint tooling is updated separately.
 
-If future work adds runtime services, create `.env.local` manually from the variables below. Do not commit `.env.local`; it is already ignored by git.
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Start local Next.js dev server. |
+| `npm run build` | Create a production build and catch route/build errors. |
+| `npm run start` | Serve an already-built production app locally. |
+| `npm run typecheck` | Run TypeScript without emitting files. |
+| `npm run lint` | Legacy lint script; update before relying on it in CI. |
+
+## Environment Variables
+
+### Required For Current App
+
+No `.env.local` file is needed.
+
+Do **not** add model keys such as `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `LANGSMITH_API_KEY` unless a server-side generation runtime is added. They are not read by the current code.
+
+### Never Expose Server Keys To The Browser
+
+Do not create variables such as:
 
 ```bash
-touch .env.local
+NEXT_PUBLIC_OPENAI_API_KEY=
+NEXT_PUBLIC_ANTHROPIC_API_KEY=
+NEXT_PUBLIC_LANGSMITH_API_KEY=
 ```
 
-There is no root `.env.example` today because no runtime variables are required by the current app.
+Any `NEXT_PUBLIC_*` variable is bundled for browser access. Model provider keys, tracing keys, database URLs, and deployment tokens must stay server-only.
 
-## Future DeepAgents Runtime
+### Future DeepAgents Runtime Only
 
-To turn the DeepAgents guidance into real-time content generation, add a server-side worker/API route first. Do not expose model keys through `NEXT_PUBLIC_*` variables.
+If a real-time DeepAgents/content-writer runtime is added later, it should run server-side through an API route, Python worker, or background job. At that point, use server-only variables like these:
 
-Recommended future variables:
-
-| Variable | Required when | Purpose |
+| Variable | Required when | Notes |
 |---|---|---|
-| `DEEPAGENTS_ENABLED` | DeepAgents runtime is enabled | Feature flag for server-side agent generation. |
-| `MODEL_PROVIDER` | Live LLM generation is enabled | Example values: `openai`, `anthropic`, `azure-openai`, `bedrock`, `vertex`. |
-| `OPENAI_API_KEY` | `MODEL_PROVIDER=openai` | Server-side OpenAI model access. |
-| `ANTHROPIC_API_KEY` | `MODEL_PROVIDER=anthropic` | Server-side Anthropic model access. |
-| `AZURE_OPENAI_API_KEY` | `MODEL_PROVIDER=azure-openai` | Azure OpenAI access. |
-| `AZURE_OPENAI_ENDPOINT` | `MODEL_PROVIDER=azure-openai` | Azure OpenAI endpoint URL. |
-| `LANGSMITH_API_KEY` | LangSmith tracing is enabled | Optional tracing/evaluation for LangGraph/DeepAgents runs. |
-| `LANGCHAIN_TRACING_V2` | LangSmith tracing is enabled | Set to `true` when using LangSmith tracing. |
-| `LANGCHAIN_PROJECT` | LangSmith tracing is enabled | Project name for traces. |
+| `DEEPAGENTS_ENABLED` | DeepAgents runtime exists and should be enabled | Feature flag. Example: `true`. |
+| `MODEL_PROVIDER` | Live LLM generation is enabled | Example: `openai`, `anthropic`, `azure-openai`, `bedrock`, `vertex`. |
+| `OPENAI_API_KEY` | `MODEL_PROVIDER=openai` | Server-side only. |
+| `ANTHROPIC_API_KEY` | `MODEL_PROVIDER=anthropic` | Server-side only. |
+| `AZURE_OPENAI_API_KEY` | `MODEL_PROVIDER=azure-openai` | Server-side only. |
+| `AZURE_OPENAI_ENDPOINT` | `MODEL_PROVIDER=azure-openai` | Server-side only. |
+| `LANGSMITH_API_KEY` | LangSmith tracing/evals are enabled | Optional, but useful for agent debugging. |
+| `LANGCHAIN_TRACING_V2` | LangSmith tracing is enabled | Usually `true`. |
+| `LANGCHAIN_PROJECT` | LangSmith tracing is enabled | Trace grouping name. |
 
 Example future `.env.local`:
 
@@ -76,54 +106,116 @@ LANGCHAIN_TRACING_V2=true
 LANGCHAIN_PROJECT=product-dev-blueprint
 ```
 
-## Future Persistence / Collaboration
+Those variables are intentionally future-facing. Adding them today will not change generated artifacts because the current app does not read them.
 
-If the app adds accounts, shared projects, or long-running generation jobs, expect additional server-only variables:
+## What A Real DeepAgents Integration Would Need
 
-| Variable | Required when | Purpose |
+The existing app only documents a DeepAgents-ready direction. To make DeepAgents generate HLD, LLD, PRD, and other documents in real time, add these pieces first:
+
+1. A server-side generation endpoint, for example `src/app/api/generate/route.ts`, or a separate backend service.
+2. A worker that runs DeepAgents with model credentials on the server, not in browser code.
+3. A content-writer workspace such as:
+
+```text
+agents/content-writer/
+  AGENTS.md
+  skills/
+    architecture-blueprint/SKILL.md
+    product-documents/SKILL.md
+    diagram-generation/SKILL.md
+  subagents.yaml
+  content_writer.py
+```
+
+4. Persistence for generation status and outputs if jobs can run longer than a request.
+5. Human review UX, because generated documents should stay draft artifacts until approved.
+
+Do not place DeepAgents prompts, memory, or provider keys in client-side bundles.
+
+## Future Persistence And Auth
+
+These are not part of the current app. Add them only when the product needs accounts, shared projects, collaboration, or background jobs.
+
+| Variable | Required when | Notes |
 |---|---|---|
-| `DATABASE_URL` | Postgres persistence is added | Stores users, projects, generations, and audit records. |
-| `REDIS_URL` | Queues/cache are added | Background jobs, rate limits, generation state, or cache. |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob exports are added | Persist generated bundles or uploaded documents. |
-| `NEXTAUTH_SECRET` or provider-specific auth secret | Auth is added | Session signing or auth provider integration. |
-| `NEXTAUTH_URL` | Auth is added | Canonical app URL for auth callbacks. |
+| `DATABASE_URL` | Server-side persistence is added | Postgres or another production database. |
+| `REDIS_URL` | Queues/cache/rate limiting are added | Useful for long-running generation jobs. |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob export persistence is added | For storing generated bundles or uploaded files. |
+| `NEXTAUTH_SECRET` | NextAuth/Auth.js is added | Session signing secret. |
+| `NEXTAUTH_URL` | NextAuth/Auth.js is added | Canonical app URL for callbacks. |
+| Provider-specific auth vars | OAuth provider is added | Example: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. |
 
 ## Vercel Deployment
 
-The repository is linked to Vercel. For normal development:
+The repo is linked to Vercel.
 
-- Pull requests create preview deployments.
-- Merges to `main` deploy production.
-- Production alias: `https://product-dev-blueprint.vercel.app`
+Current production URL:
 
-For manual CLI deploys from a logged-in machine:
+```text
+https://product-dev-blueprint.vercel.app
+```
+
+Normal flow:
+
+- Pull requests create Vercel preview deployments.
+- Merges to `main` create production deployments.
+- No runtime environment variables are required for the current production app.
+
+Manual deploy from a machine already logged into Vercel:
 
 ```bash
 npx vercel deploy --prod --yes
 ```
 
-For CI-driven CLI deploys, Vercel usually needs these CI secrets:
+CI-driven deploys through Vercel CLI, instead of the GitHub integration, usually need CI secrets:
 
 | Variable | Purpose |
 |---|---|
-| `VERCEL_TOKEN` | Authenticates Vercel CLI in CI. |
-| `VERCEL_ORG_ID` | Vercel team/org id. |
+| `VERCEL_TOKEN` | Authenticates the Vercel CLI in CI. |
+| `VERCEL_ORG_ID` | Vercel team or account id. |
 | `VERCEL_PROJECT_ID` | Vercel project id. |
 
-These are not app runtime variables and should not be exposed to the browser.
+These are deployment secrets, not app runtime variables. Never expose them as `NEXT_PUBLIC_*`.
 
-## Preview And Testing
+## Adding Environment Variables On Vercel
 
-Preferred checks:
+Only do this after code actually reads the variable server-side.
 
 ```bash
-npm run typecheck
-npm run build
+npx vercel env add OPENAI_API_KEY production
+npx vercel env add OPENAI_API_KEY preview
 ```
 
-For visual checks, use either:
+After changing production env vars, trigger a new production deployment:
 
-- Local dev URL: `http://localhost:3000`
-- Production URL: `https://product-dev-blueprint.vercel.app`
+```bash
+npx vercel deploy --prod --yes
+```
 
-Inside the Codex app, use the in-app browser preview for local or Vercel URLs. Chrome headless is not required for ordinary UI checks.
+## Data And Reset Notes
+
+- Project data is stored in browser `localStorage` under the app origin.
+- Data is not shared across browsers, devices, or users.
+- There is no server backup of projects.
+- Use the Settings page for export/import/clear flows when available.
+- Incognito/private browsing may lose projects when the session ends.
+
+## Visual Preview
+
+Preferred browser preview paths:
+
+- Local: `http://localhost:3000`
+- Production: `https://product-dev-blueprint.vercel.app`
+
+In Codex, use the in-app browser preview for UI checks. Chrome headless is not required for normal verification.
+
+## Troubleshooting
+
+| Problem | Check |
+|---|---|
+| `nvm use` fails | Install `nvm`, or manually use Node 20+. |
+| `npm install` differs from CI | Use `npm ci` for a clean install from `package-lock.json`. |
+| Local projects disappeared | Check browser/site data; projects live only in localStorage. |
+| Vercel deploy succeeds but old UI appears | Confirm the production alias points to the newest deployment in Vercel. |
+| DeepAgents keys do nothing | Expected today. No runtime code reads those keys yet. |
+| Build fails after adding a server feature | Re-check that server-only imports are not pulled into client components. |
