@@ -139,7 +139,7 @@ export function Card({
   return (
     <div
       className={clsx(
-        "min-w-0 max-w-full bg-white border border-ink-200 rounded-xl shadow-sm dark:bg-ink-900 dark:border-ink-800 dark:shadow-none",
+        "min-w-0 max-w-full bg-white border border-ink-200 rounded-lg shadow-sm dark:bg-ink-900 dark:border-ink-800 dark:shadow-none",
         className,
       )}
     >
@@ -198,7 +198,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="min-w-0 max-w-full overflow-hidden text-center py-12 sm:py-16 px-4 sm:px-6 border-2 border-dashed border-ink-200 dark:border-ink-800 rounded-xl bg-white dark:bg-ink-900">
+    <div className="min-w-0 max-w-full overflow-hidden text-center py-12 sm:py-16 px-4 sm:px-6 border-2 border-dashed border-ink-200 dark:border-ink-800 rounded-lg bg-white dark:bg-ink-900">
       <h3 className="text-base font-semibold text-ink-900 dark:text-ink-50">{title}</h3>
       <p className="text-sm text-ink-600 dark:text-ink-400 mt-1 max-w-md mx-auto break-words">{body}</p>
       {action && <div className="mt-4">{action}</div>}
