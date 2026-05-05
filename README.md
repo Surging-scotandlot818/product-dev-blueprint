@@ -3,7 +3,7 @@
 > **Production:** [product-dev-blueprint.vercel.app](https://product-dev-blueprint.vercel.app)
 
 [![CI](https://github.com/Abby263/product-dev-blueprint/actions/workflows/ci.yml/badge.svg)](https://github.com/Abby263/product-dev-blueprint/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg)](LICENSE)
 
 Product Dev Blueprint is a schema-first product planning application for turning a rough software idea into a focused build-readiness plan. It helps a Product Manager, Solution Architect, founder, or engineering lead pressure-test an idea before development starts, then generates a traceable artifact bundle that can be handed to an engineering team or coding agent.
 
@@ -343,4 +343,8 @@ The current app keeps these capabilities out of the browser until a secure serve
 
 ## License
 
-[MIT](LICENSE)
+This repository is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE).
+
+Commercial use is not permitted under this license. Any commercial use, including resale, SaaS hosting, paid client work, embedding this repository in a paid product, or using it to provide paid services, requires separate written permission from the copyright holder. See [COMMERCIAL.md](COMMERCIAL.md) for the repository's commercial-use notice.
+
+This is a source-available non-commercial license, not an OSI open-source license. AGPL was not used because AGPL permits commercial use when its license conditions are followed.
