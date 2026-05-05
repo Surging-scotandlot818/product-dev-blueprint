@@ -6,6 +6,32 @@ import { Badge, Button, Card } from "@/components/ui";
 import { TEMPLATES, BLANK_TEMPLATE } from "@/lib/templates";
 import type { TemplateMeta } from "@/lib/templates/types";
 
+const OWNER_SECTIONS = [
+  {
+    owner: "Product Manager",
+    title: "Market, scope, and decision quality",
+    items: ["Problem and urgency", "Buyer and user", "Success metrics", "MVP boundary", "Validation plan"],
+  },
+  {
+    owner: "Solution Architect",
+    title: "Architecture, data, and delivery risk",
+    items: ["HLD and LLD", "Schema design", "OAuth / SSO", "Security review", "Infra and scaling"],
+  },
+  {
+    owner: "Engineering",
+    title: "Build handoff and execution",
+    items: ["Implementation slices", "Acceptance criteria", "Test strategy", "Risk register", "Coding-agent prompts"],
+  },
+];
+
+const STARTING_PATHS = [
+  { label: "Use a realistic template", body: "Prefilled enterprise scenarios with stack, scale, security, and architecture details." },
+  { label: "Start blank", body: "Answer every PM and architect section from scratch for a custom idea." },
+  { label: "Review before generate", body: "Project details open after selection, so the template card stays focused on choosing the starting point." },
+];
+
+const TEMPLATE_FILTERS = ["All", "AI", "SaaS", "Marketplace", "Internal", "Blank"];
+
 export default function NewProjectPage() {
   const router = useRouter();
   const createDraftProject = useStore((s) => s.createDraftProject);
@@ -23,26 +49,114 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
-      <h1 className="text-3xl font-semibold tracking-tight text-ink-900 dark:text-ink-50">
-        Start a new blueprint
-      </h1>
-      <p className="text-sm text-ink-600 dark:text-ink-400 mt-1 max-w-2xl">
-        Choose a starting point. Project details open in the intake flow after selection.
-      </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <section className="grid min-w-0 lg:grid-cols-[0.78fr_1.22fr] gap-5 lg:gap-6">
+        <div className="rounded-lg border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 sm:p-6">
+          <Badge tone="accent">New blueprint</Badge>
+          <h1 className="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight text-ink-900 dark:text-ink-50">
+            Choose a starting point
+          </h1>
+          <p className="mt-3 text-sm sm:text-base text-ink-700 dark:text-ink-300 leading-relaxed max-w-2xl">
+            Select a template that matches the product shape. The intake opens after selection, where PM and architect
+            answers can be reviewed and changed before generation.
+          </p>
 
-      <div className="mt-8">
-        <h2 className="text-sm font-semibold text-ink-800 dark:text-ink-100 mb-3">Templates</h2>
-        <div className="grid min-w-0 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {TEMPLATES.map((template) => (
-            <TemplateCard
-              key={template.id}
-              template={template}
-              onSelect={() => start(template)}
-            />
+          <div className="mt-5 grid gap-2">
+            {STARTING_PATHS.map((path, index) => (
+              <div key={path.label} className="flex gap-3 rounded-md border border-ink-200 dark:border-ink-800 p-3">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-900 dark:bg-ink-50 text-[11px] font-semibold text-white dark:text-ink-900">
+                  {index + 1}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-ink-900 dark:text-ink-50">{path.label}</div>
+                  <p className="mt-1 text-xs sm:text-sm text-ink-600 dark:text-ink-400 leading-relaxed">{path.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid min-w-0 md:grid-cols-3 gap-3">
+          {OWNER_SECTIONS.map((section) => (
+            <Card key={section.owner} className="p-4 sm:p-5">
+              <div className="text-[11px] uppercase tracking-wider text-accent-600 dark:text-accent-300">
+                {section.owner}
+              </div>
+              <div className="mt-2 text-base font-semibold text-ink-900 dark:text-ink-50">{section.title}</div>
+              <ul className="mt-3 space-y-1.5 text-sm text-ink-600 dark:text-ink-400">
+                {section.items.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
           ))}
         </div>
-      </div>
+      </section>
+
+      <section className="mt-8 grid min-w-0 lg:grid-cols-[260px_1fr] gap-5 lg:gap-6">
+        <aside className="space-y-4">
+          <Card className="p-4">
+            <div className="text-sm font-semibold text-ink-900 dark:text-ink-50">Template library</div>
+            <p className="mt-2 text-sm text-ink-600 dark:text-ink-400 leading-relaxed">
+              Templates are intentionally different across stack, cloud, data model, compliance posture, and scale.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {TEMPLATE_FILTERS.map((filter) => (
+                <span
+                  key={filter}
+                  className="rounded-md border border-ink-200 dark:border-ink-800 bg-ink-50 dark:bg-ink-950 px-2 py-1 text-xs text-ink-700 dark:text-ink-300"
+                >
+                  {filter}
+                </span>
+              ))}
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="text-sm font-semibold text-ink-900 dark:text-ink-50">Generated output</div>
+            <div className="mt-3 space-y-2 text-sm text-ink-600 dark:text-ink-400">
+              <OutputRow label="Decision" value="Readiness and gaps" />
+              <OutputRow label="Product" value="PRD and MVP scope" />
+              <OutputRow label="Architecture" value="HLD, LLD, schema, APIs" />
+              <OutputRow label="Build" value="Tasks, tests, prompts" />
+            </div>
+          </Card>
+        </aside>
+
+        <div className="min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-50">
+                Pick the closest scenario
+              </h2>
+              <p className="mt-1 text-sm text-ink-600 dark:text-ink-400">
+                Use the Select button on a card to create the project and continue to intake.
+              </p>
+            </div>
+            <div className="text-xs text-ink-500 dark:text-ink-400">
+              {TEMPLATES.length} starting points
+            </div>
+          </div>
+
+          <div className="mt-4 grid min-w-0 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {TEMPLATES.map((template) => (
+              <TemplateCard key={template.id} template={template} onSelect={() => start(template)} />
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function OutputRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-3 border-b last:border-b-0 border-ink-200 dark:border-ink-800 pb-2 last:pb-0">
+      <span className="font-medium text-ink-800 dark:text-ink-200">{label}</span>
+      <span className="text-right">{value}</span>
     </div>
   );
 }
@@ -55,57 +169,106 @@ function TemplateCard({
   onSelect: () => void;
 }) {
   const isBlank = template.id === BLANK_TEMPLATE.id;
+  const platform = template.payload?.platform;
+  const systemDesign = template.payload?.systemDesign;
+  const market = template.payload?.market;
+
+  const stackChips = template.stackChips?.length
+    ? template.stackChips
+    : compact([platform?.frontend, platform?.backend, platform?.database]);
+
+  const governanceChips = template.complianceChips?.length
+    ? template.complianceChips
+    : compact([platform?.authMethod, platform?.cloud, systemDesign?.authArchitecture]);
+
   return (
     <Card className="w-full max-w-full overflow-hidden p-4 sm:p-5 h-full flex flex-col min-w-0">
-      <div className="flex min-w-0 items-start justify-between gap-2">
-        <div className="min-w-0 text-sm font-semibold text-ink-900 dark:text-ink-50 break-words">
-          {template.title}
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-ink-900 dark:text-ink-50 break-words">{template.title}</div>
+          <div className="mt-1 text-[11px] uppercase tracking-wider text-ink-500 dark:text-ink-400">
+            {template.vertical || market?.vertical || "Custom"}
+          </div>
         </div>
-        {!isBlank && <Badge tone="good">Pre-filled</Badge>}
+        {isBlank ? <Badge>Blank</Badge> : <Badge tone="good">Prefilled</Badge>}
       </div>
-      <p className="mt-1.5 text-xs text-ink-600 dark:text-ink-400 leading-relaxed break-words">{template.blurb}</p>
 
-      {template.vertical && (
-        <div className="mt-3 text-[11px] uppercase tracking-wider text-ink-500 dark:text-ink-400">
-          {template.vertical}
+      <p className="mt-3 text-sm text-ink-600 dark:text-ink-400 leading-relaxed break-words">{template.blurb}</p>
+
+      <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+        <Signal label="Cloud" value={platform?.cloud || "Choose"} />
+        <Signal label="Pattern" value={systemDesign?.architecturePattern || "Choose"} />
+        <Signal label="Auth" value={platform?.authMethod || "Choose"} />
+        <Signal label="Data" value={platform?.database || "Choose"} />
+      </div>
+
+      {stackChips.length > 0 && (
+        <div className="mt-4">
+          <div className="text-[11px] font-medium text-ink-500 dark:text-ink-400">Stack direction</div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {stackChips.slice(0, 5).map((chip) => (
+              <Chip key={chip} tone="neutral">
+                {chip}
+              </Chip>
+            ))}
+          </div>
         </div>
       )}
 
-      {template.stackChips && template.stackChips.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {template.stackChips.map((chip) => (
-            <span
-              key={chip}
-              className="max-w-full break-words text-[10px] px-1.5 py-0.5 rounded border border-ink-200 dark:border-ink-700 bg-ink-50 dark:bg-ink-800 text-ink-700 dark:text-ink-200"
-            >
-              {chip}
-            </span>
-          ))}
+      {governanceChips.length > 0 && (
+        <div className="mt-3">
+          <div className="text-[11px] font-medium text-ink-500 dark:text-ink-400">Governance and scale</div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {governanceChips.slice(0, 5).map((chip) => (
+              <Chip key={chip} tone="warn">
+                {chip}
+              </Chip>
+            ))}
+          </div>
         </div>
       )}
 
-      {template.complianceChips && template.complianceChips.length > 0 && (
-        <div className="mt-1 flex flex-wrap gap-1">
-          {template.complianceChips.map((chip) => (
-            <span
-              key={chip}
-              className="max-w-full break-words text-[10px] px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-700/40 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200"
-            >
-              {chip}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {template.scaleChip && (
-        <div className="mt-3 text-[11px] text-ink-500 dark:text-ink-400 break-words">{template.scaleChip}</div>
-      )}
+      <div className="mt-4 rounded-md border border-ink-200 dark:border-ink-800 bg-ink-50 dark:bg-ink-950 p-3 text-xs text-ink-600 dark:text-ink-400 leading-relaxed">
+        {template.scaleChip || "Define audience, stack, architecture, and delivery constraints in the intake."}
+      </div>
 
       <div className="mt-auto pt-4">
         <Button onClick={onSelect} className="w-full justify-center">
-          {isBlank ? "Start blank" : "Use template"}
+          {isBlank ? "Start blank" : "Select template"}
         </Button>
       </div>
     </Card>
   );
+}
+
+function Signal({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-ink-200 dark:border-ink-800 p-2">
+      <div className="text-[10px] uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</div>
+      <div className="mt-1 font-medium text-ink-900 dark:text-ink-100 break-words">{value}</div>
+    </div>
+  );
+}
+
+function Chip({
+  children,
+  tone,
+}: {
+  children: string;
+  tone: "neutral" | "warn";
+}) {
+  const classes =
+    tone === "warn"
+      ? "border-amber-200 dark:border-amber-700/40 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200"
+      : "border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200";
+
+  return (
+    <span className={`max-w-full break-words text-[11px] px-2 py-1 rounded border ${classes}`}>
+      {children}
+    </span>
+  );
+}
+
+function compact(values: Array<string | undefined | null>) {
+  return values.filter((value): value is string => Boolean(value));
 }
