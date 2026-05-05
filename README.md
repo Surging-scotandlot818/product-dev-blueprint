@@ -1,159 +1,346 @@
 # Product Dev Blueprint
 
-> **Live:** [product-dev-blueprint.vercel.app](https://product-dev-blueprint.vercel.app)
-
-Turn any idea into a **focused build-readiness plan**. Describe what you want to build; the platform helps you evaluate the idea, identify risky scenarios, scope the MVP, and produce developer-ready handoff artifacts from one guided flow.
+> **Production:** [product-dev-blueprint.vercel.app](https://product-dev-blueprint.vercel.app)
 
 [![CI](https://github.com/Abby263/product-dev-blueprint/actions/workflows/ci.yml/badge.svg)](https://github.com/Abby263/product-dev-blueprint/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Built for **Product Managers, Founders, Business Analysts, Solution Architects, Engineering Managers, Pre-sales Consultants, and Innovation / Enterprise Transformation teams.**
+Product Dev Blueprint is a schema-first product planning application for turning a rough software idea into a focused build-readiness plan. It helps a Product Manager, Solution Architect, founder, or engineering lead pressure-test an idea before development starts, then generates a traceable artifact bundle that can be handed to an engineering team or coding agent.
 
-## What you get first
+The current production application is a client-side Next.js app with deterministic artifact generation. It does not require model API keys, auth, a database, or a backend service to run.
 
-Every project starts with a **Build readiness report**:
+## UI Demo
 
-- Idea readiness scorecard across desirability, feasibility, viability, risk readiness, and decision confidence
-- Scenario checks based on vertical, platform, timing model, AI usage, compliance, and data sensitivity
-- Critical gaps that should block build approval
-- MVP build slice, top risks, validation experiments, compliance prompts, and developer guardrails
+There is no recorded demo video checked into the repo yet. Instead, this README includes a screenshot-based demo captured from the current production UI. The assets live in [`docs/assets`](docs/assets) and can be replaced by a real video later.
 
-## Supporting bundle
+### 1. Start From The Decision Workspace
 
-Every project generates a draft bundle of:
+The landing page now presents the product as a decision and readiness workspace, not as a large pile of documents. It highlights the scorecard, scenario coverage, product ownership, architecture ownership, and build handoff groups.
 
-| # | Artifact | Description |
-|---|---|---|
-| 00 | Build readiness report | Scorecard, gaps, scenario checks, validation experiments, MVP guardrails |
-| 01 | Executive summary | One-page business case, audience, success criteria |
-| 02 | PRD | Goals, personas, requirements, features, KPIs |
-| 03 | SOW | Scope, deliverables, milestones, acceptance |
-| 04 | Engineering specification | Stack, contracts, rollout, monitoring, recovery, tradeoffs |
-| 05 | ADR pack | Decisions with context, alternatives, consequences |
-| 06 | Data & interface spec | Entities, integrations, retention, residency |
-| 07 | Requirements traceability matrix | Each requirement linked to design and tests |
-| 08 | Test strategy | Coverage targets, scenarios, acceptance gates |
-| 09 | Launch & operations plan | SLOs, runbook, rollback, on-call posture |
-| 10 | Marketing & GTM brief | Positioning, segments, pricing, launch geography |
-| 11 | Risk register & governance | Risks, assumptions, open questions, compliance packs |
-| 12 | Architecture blueprint | High-level architecture, low-level architecture, scaling, DR, tradeoff matrix |
-| 13 | AI architecture | Pipeline, RAG, evals, guardrails, HITL |
-| 14 | Security & compliance checklist | Frameworks, controls, framework-specific reminders |
-| 15 | Feature specification | Per-feature acceptance, edge cases, security, ops |
-| 16 | Implementation roadmap | Features grouped by release with quality gates |
-| 17 | Cost estimate | Order-of-magnitude monthly infra cost based on stack and capacity |
-| 18 | Coding-agent prompt pack | Cursor / Lovable / Replit-ready prompts wired to the bundle |
+![Product Dev Blueprint landing page](docs/assets/ui-demo-landing.jpg)
 
-Stable IDs (`FR-001`, `NFR-001`, `FEAT-001`, `ADR-001`, `RISK-001`, `ASM-001`, `Q-001`, `INT-001`, `ENT-001`, `SLO-001`, `KPI-001`) are assigned at creation and persist across every document.
+### 2. Choose A Starting Template
 
-Bundle exports include **Markdown** + **DOCX** for every artifact, the raw `project.json`, and a **`scaffold/` folder** with a starter README, `.env.example`, `docker-compose.yml`, and CI workflow stub matched to your platform stack.
+The new-project page separates responsibility between Product Manager, Solution Architect, and Engineering. Template cards show stack direction, cloud, auth, data model, architecture pattern, governance, compliance, and scale signals.
 
-## How it works
+![Template selection page](docs/assets/ui-demo-template-selection.jpg)
 
-1. **Describe your idea** — name the project, write a one-liner, paste a longer description.
-2. **Walk thirteen guided domains** — Problem → Market → Experience → Product surface & stack → Functional → Features → Quality attributes → Architecture & scale → Data, integrations & tradeoffs → AI → Security → GTM → Governance. Conditional questions branch by surface, vertical, platform, and timing model.
-3. **One canonical schema** — every answer writes to one `Project` object (see [`src/lib/schema.ts`](src/lib/schema.ts)). Intake autosaves to `localStorage`.
-4. **Schema-first generation** — deterministic generators (under [`src/lib/generators/`](src/lib/generators)) read from the schema and render markdown. Change one answer and every relevant document updates consistently.
-5. **Decide and hand off** — start with the readiness report, then download the full bundle as Markdown + DOCX in a single zip or paste the coding-agent prompt pack into Cursor / Lovable / Replit.
+### 3. Review Generated Artifacts
 
-The platform infers context-specific corner cases (e.g. virtual-queue UX cases when the timing model is real-time) and activates compliance packs (PIPEDA, HIPAA, PHIPA, OSFI, PCI DSS, GDPR, OWASP ASVS, OWASP LLM Top 10, NIST AI RMF) by vertical and geography.
+After selecting a template, the app creates a project, marks the seeded intake complete, and opens generated artifacts. The readiness report is the default artifact; supporting documents are grouped for product, architecture, delivery, and governance review.
 
-A rule-based **feature suggestion engine** seeds tailored feature lists when the user clicks _Suggest features_ in the Feature Builder — driven by surface, timing model, vertical, AI, and platform choices.
+![Generated artifacts page](docs/assets/ui-demo-artifacts.jpg)
 
-Every dropdown in the wizard ships with **inline "best for" guidance** under the selected option — so you don't need to leave the page to research what each stack/framework choice implies.
+## Product Goals
 
-The architecture step generates both **high-level** and **low-level** architecture views from the user's inputs, plus a tradeoff matrix covering identity/OAuth/SSO, authorization, tenant isolation, security, privacy, data consistency, APIs, integrations, async workflows, realtime, caching, DR, observability, AI agents, mobile/offline, and build-vs-buy decisions.
+Product Dev Blueprint is designed to answer four questions before a team commits engineering time:
 
-The AI step covers more than just provider choice: **agent framework** (LangGraph, LangGraph DeepAgents, LangChain, LlamaIndex, CrewAI, AutoGen, OpenAI Assistants, Vercel AI SDK, Haystack), **observability/tracing** (LangSmith, Langfuse, W&B Weave, Arize, OpenLLMetry, Datadog LLM, Helicone), and **vector database** (pgvector, Pinecone, Weaviate, Qdrant, Chroma, Milvus, etc.) — all with the same inline guidance.
+1. **Should we build this?** Validate the problem, market, user, buyer, urgency, and confidence level.
+2. **What can break this?** Surface operational, legal, security, data, scale, AI, and adoption risks early.
+3. **What should the MVP contain?** Convert the idea into a constrained build slice with validation gates.
+4. **How should engineering build it?** Produce HLD, LLD, schema, APIs, security posture, roadmap, tests, and coding-agent prompts.
 
-For future LLM-backed artifact generation, the architecture blueprint includes a DeepAgents-ready path inspired by LangChain's [content-builder example](https://github.com/langchain-ai/deepagents/tree/main/examples/content-builder-agent): persistent memory (`AGENTS.md`), on-demand skills (`skills/*/SKILL.md`), and delegated subagents (`subagents.yaml`) running in a server-side Python worker, never in the browser.
+## Target Users
 
-## Stack
+- Product Managers defining PRDs and MVP scope
+- Founders validating a SaaS or marketplace idea
+- Business Analysts converting business concepts into implementation-ready detail
+- Solution Architects designing HLD, LLD, schema, APIs, auth, and deployment topology
+- Engineering Managers estimating risk and sequencing delivery
+- Pre-sales and transformation teams creating client-facing solution blueprints
+- Developers using Cursor, Codex, or similar tools to build from structured specs
 
-- Next.js 14 (App Router) + TypeScript
-- Tailwind CSS with class-based dark mode (system preference + manual toggle)
-- Zustand with `localStorage` persistence (single-user demo — no backend required)
-- `react-markdown` + `remark-gfm` for rendering
-- `docx` for Word-compatible exports, `jszip` for bundle export
+## Current Runtime Status
 
-## Run locally
+| Area | Current implementation |
+|---|---|
+| UI | Next.js 14 App Router, React, TypeScript, Tailwind CSS |
+| Persistence | Browser `localStorage` through Zustand |
+| Artifact generation | Deterministic TypeScript generators in `src/lib/generators` |
+| HLD / LLD | Generated from user inputs through the system-design generator |
+| Mermaid diagrams | Rendered as visual diagrams in generated architecture artifacts |
+| Exports | Markdown, DOCX, JSON, and zip bundle |
+| Auth | Not implemented |
+| Backend database | Not implemented |
+| Live LLM calls | Not implemented in the current runtime |
+| DeepAgents | Planned server-side integration path documented, not wired at runtime |
 
-For environment variables and deployment prerequisites, see [`SETUP.md`](SETUP.md).
+Required runtime environment variables today: **none**. See [`SETUP.md`](SETUP.md) for current and future API key guidance.
+
+## Core Workflow
+
+```mermaid
+flowchart LR
+  A["Start with blank idea or template"] --> B["Complete PM-owned intake"]
+  B --> C["Complete Solution Architect intake"]
+  C --> D["Generate readiness report"]
+  D --> E["Review product, architecture, risk, and delivery artifacts"]
+  E --> F["Export Markdown, DOCX, JSON, and coding-agent prompts"]
+```
+
+## Capabilities
+
+### Idea Evaluation
+
+- Problem, audience, buyer, market timing, alternatives, differentiation, pricing, and success criteria
+- Build-readiness scorecard across desirability, feasibility, viability, risk readiness, and decision confidence
+- Critical gaps and assumptions that should block or narrow implementation
+- Validation experiments and MVP guardrails
+
+### PM-Owned Product Planning
+
+- Personas and jobs-to-be-done
+- Functional and non-functional requirements
+- Feature backlog with acceptance criteria, edge cases, security notes, audit needs, dependencies, and release grouping
+- KPI and success-measure definition
+- Marketing and GTM brief
+- SOW and executive summary outputs
+
+### Solution Architecture Planning
+
+- High-level architecture and low-level architecture
+- Schema design and domain modeling
+- API contract notes and integration boundaries
+- OAuth, SSO, RBAC, authorization, tenancy, and audit posture
+- Infra, cloud services, networking, CI/CD, Terraform/IaC, observability, DR, scaling, and release gates
+- Architecture tradeoff matrix covering build-vs-buy, events, caching, realtime, privacy, security, data residency, and operational risk
+
+### AI Product Planning
+
+For AI use cases, the app captures:
+
+- Agent framework direction, including LangGraph and DeepAgents
+- RAG pipeline, vector database, embeddings, retrieval, evals, and guardrails
+- Prompt-injection and AI safety review areas
+- Model observability and tracing options
+- Human-in-the-loop escalation and approval flows
+- Future DeepAgents content-writer architecture, with server-side memory, skills, and subagents
+
+### Export And Handoff
+
+- Download individual `.md` or `.docx` artifacts
+- Download full bundle as `.zip`
+- Download raw `project.json`
+- Copy markdown directly from the artifact viewer
+- Use coding-agent prompts as structured input for Cursor, Codex, Lovable, Replit, or other development tools
+
+## Generated Artifact Bundle
+
+The app does generate a large supporting bundle, but the UI and README intentionally group it by outcome so users do not experience it as a wall of documents.
+
+| Group | Artifacts |
+|---|---|
+| Decision brief | Build readiness report, executive summary, implementation roadmap, cost estimate |
+| Product definition | PRD, SOW, marketing/GTM brief |
+| Architecture blueprint | Engineering specification, architecture blueprint, AI architecture, data/interface spec, ADR pack |
+| Delivery package | Feature specification, requirements traceability matrix, test strategy, launch/operations plan |
+| Governance | Risk register, security/compliance checklist |
+| Coding handoff | Coding-agent prompt pack and scaffold bundle |
+
+Stable IDs are assigned across the project schema and reused in generated artifacts:
+
+```text
+FR-001, NFR-001, FEAT-001, ADR-001, RISK-001, ASM-001,
+Q-001, INT-001, ENT-001, SLO-001, KPI-001
+```
+
+## Architecture Overview
+
+The shipped app is intentionally simple and frontend-only. This makes it easy to run, demo, and deploy while the product workflow is still being refined.
+
+```mermaid
+flowchart TB
+  Browser["Browser"]
+  UI["Next.js App Router UI"]
+  Store["Zustand localStorage store"]
+  Schema["Canonical Project schema"]
+  Generators["Deterministic artifact generators"]
+  Renderer["Markdown / Mermaid / DOCX renderer"]
+  Exporter["Zip, JSON, Markdown, DOCX exports"]
+
+  Browser --> UI
+  UI --> Store
+  Store --> Schema
+  Schema --> Generators
+  Generators --> Renderer
+  Generators --> Exporter
+```
+
+Future server-side capabilities such as accounts, shared projects, background generation, and DeepAgents content writing should be added behind server APIs or workers. Provider keys must never be exposed to browser bundles.
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 App Router |
+| Language | TypeScript |
+| UI | React, Tailwind CSS |
+| State | Zustand with browser persistence |
+| Markdown | `react-markdown`, `remark-gfm` |
+| DOCX export | `docx` |
+| Zip export | `jszip` |
+| Deployment | Vercel |
+| CI | GitHub Actions |
+
+## Local Development
+
+Prerequisites:
+
+- Node.js 20 or newer
+- npm
+- Optional: Vercel CLI for manual deployments
+
+Install and run:
 
 ```bash
-nvm use            # picks up .nvmrc (Node 20)
+nvm use
 npm install
-npm run dev        # http://localhost:3000
-npm run build      # production build
-npm run typecheck
+npm run dev
 ```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+Run production checks:
+
+```bash
+npm run typecheck
+npm run build
+```
+
+Scripts:
+
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Start the local Next.js dev server |
+| `npm run build` | Build the production app |
+| `npm run start` | Serve the built app locally |
+| `npm run typecheck` | Run TypeScript without emitting files |
+| `npm run lint` | Legacy lint command; see `SETUP.md` before relying on it |
+
+## Environment Variables
+
+No `.env.local` file is required for the current application.
+
+Do not add model keys such as `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `LANGSMITH_API_KEY` unless a server-side generation runtime is added. If DeepAgents or live model generation is implemented later, use server-only variables and never expose them through `NEXT_PUBLIC_*`.
+
+See [`SETUP.md`](SETUP.md) for:
+
+- Current runtime requirements
+- Future DeepAgents variables
+- Vercel deployment variables
+- Auth/database variables for a future multi-user version
+- Troubleshooting notes
 
 ## Deployment
 
-Production runs on **Vercel** with the GitHub integration:
+Production runs on Vercel through the GitHub integration.
 
-- Every push to `main` triggers a **production deploy** to [product-dev-blueprint.vercel.app](https://product-dev-blueprint.vercel.app).
-- Every pull request triggers a **preview deploy** with its own URL.
-- CI (`.github/workflows/ci.yml`) runs `npm run typecheck` and `npm run build` on every PR and push to main.
+| Event | Result |
+|---|---|
+| Pull request opened | Vercel preview deployment |
+| Push to PR branch | Preview redeploy |
+| Merge to `main` | Production deployment |
+| GitHub Actions | Type-check and production build |
 
-## Project structure
+Production URL:
 
+```text
+https://product-dev-blueprint.vercel.app
 ```
+
+Manual production deploy from a linked and authenticated machine:
+
+```bash
+npx vercel deploy --prod --yes
+```
+
+## Project Structure
+
+```text
 .github/
-  workflows/ci.yml                  # type-check + build on every PR + push
-  dependabot.yml                    # weekly npm + monthly actions updates
+  workflows/ci.yml                  # Type-check and build
+  dependabot.yml                    # Dependency update checks
   pull_request_template.md
+docs/
+  assets/                           # README demo screenshots
 src/
   app/
-    page.tsx                        # Landing
-    settings/page.tsx               # Settings (export/import/clear)
+    page.tsx                        # Landing page
+    settings/page.tsx               # Import/export/clear settings
     projects/
-      page.tsx                      # Dashboard
-      new/page.tsx                  # Create
-      [id]/page.tsx                 # Overview
-      [id]/intake/page.tsx          # Wizard host
-      [id]/artifacts/page.tsx       # Generated docs + export
+      page.tsx                      # Project dashboard
+      new/page.tsx                  # Template selection
+      [id]/page.tsx                 # Project overview
+      [id]/intake/page.tsx          # Guided intake wizard
+      [id]/artifacts/page.tsx       # Generated artifacts and export actions
   components/
-    ui.tsx                          # Buttons, inputs, cards, badges
-    ThemeToggle.tsx                 # Light/dark toggle
+    ui.tsx                          # Shared UI primitives
+    ThemeToggle.tsx                 # Theme switcher
+    MermaidDiagram.tsx              # Mermaid rendering and enlarge view
     wizard/
-      WizardShell.tsx               # Step navigation + progress
-      steps.tsx                     # Basics, Problem, Market, Experience,
-                                    # Functional, NF, DataTech, GTM, Governance
-      steps-extended.tsx            # Platform, Features, SystemDesign, AI, Compliance
+      WizardShell.tsx               # Wizard layout, progress, navigation
+      steps.tsx                     # Core intake steps
+      steps-extended.tsx            # Platform, features, system design, AI, compliance
   lib/
     schema.ts                       # Canonical Project type
-    store.ts                        # Zustand store
+    store.ts                        # Zustand store and localStorage persistence
     ids.ts                          # Stable ID allocation
-    options.ts                      # Dropdown option catalog with "best for" hints
-    architecture-scenarios.ts       # Architecture/tradeoff scenario catalog
+    options.ts                      # Intake option catalog and guidance
+    architecture-scenarios.ts       # Tradeoff and architecture scenario catalog
     feature-suggestions.ts          # Rule-based feature seeding
-    scaffold.ts                     # Stack-aware boilerplate scaffold
-    docx.ts                         # Markdown → DOCX renderer
-    export.ts                       # Zip bundle + JSON downloads
-    generators/                     # Markdown renderers per artifact (readiness + 18 supporting docs)
+    scaffold.ts                     # Stack-aware scaffold export
+    docx.ts                         # Markdown to DOCX rendering
+    export.ts                       # Zip and JSON export helpers
+    generators/                     # Deterministic artifact generators
 ```
 
-## Contributing
+## Data And Privacy Notes
 
-PRs welcome. The repo uses a standard PR workflow:
+- Projects are stored in the browser only.
+- Data is not synchronized across devices or users.
+- Clearing browser/site data can delete local projects.
+- There is no server-side backup in the current implementation.
+- Generated artifacts are drafts and should be reviewed before use in production delivery.
 
-1. Branch from `main`.
-2. `npm run typecheck && npm run build` locally.
-3. Open a PR — CI must pass before merge.
-4. Squash-merge into `main`. Vercel auto-deploys.
+For a production multi-user version, add auth, a database, server-side exports, access controls, audit logs, and backup/retention policies before storing real customer or regulated data.
+
+## Quality Gates
+
+Before merging:
+
+```bash
+npm run typecheck
+npm run build
+```
+
+CI runs the same required checks on pull requests and pushes to `main`.
 
 ## Roadmap
 
-This MVP intentionally does **not** include:
+Near-term product improvements:
 
-- A backend (FastAPI / Postgres / Redis / S3)
-- Auth (NextAuth / Clerk)
-- Live LLM calls (the bundle is deterministic; the coding-agent prompt pack is meant to be pasted into an external coding agent)
-- Real-time collaboration, comments, version history
+- Persist projects server-side with accounts and shared workspaces
+- Add version history, comments, and review workflow
+- Add live DeepAgents-based content writer generation behind a server runtime
+- Add uploaded context documents for deeper artifact generation
+- Add richer diagram export options
+- Add Linear/Jira/GitHub issue export
+- Add team roles for Product Manager, Solution Architect, Engineering, Security, and Reviewer
 
-These are explicit roadmap items documented in [`deep-research-report.md`](deep-research-report.md).
+The current app keeps these capabilities out of the browser until a secure server-side runtime is introduced.
+
+## Contributing
+
+1. Branch from `main`.
+2. Make focused changes.
+3. Run `npm run typecheck` and `npm run build`.
+4. Open a pull request.
+5. Merge after CI and preview deployment pass.
 
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE)
