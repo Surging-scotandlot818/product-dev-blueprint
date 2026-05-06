@@ -44,6 +44,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <nav className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4 text-sm">
                 <Link href="/projects" className="text-ink-700 dark:text-ink-300 hover:text-ink-900 dark:hover:text-ink-50">Projects</Link>
                 <Link href="/settings" className="text-ink-700 dark:text-ink-300 hover:text-ink-900 dark:hover:text-ink-50">Settings</Link>
+                <a
+                  href="https://github.com/Abby263/product-dev-blueprint"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-ink-700 dark:text-ink-300 hover:text-ink-900 dark:hover:text-ink-50"
+                >
+                  GitHub
+                </a>
                 <ThemeToggle />
               </nav>
               <Link href="/projects/new" className="w-full max-w-full sm:w-auto text-center px-3 py-1.5 rounded-md bg-ink-900 dark:bg-ink-50 text-white dark:text-ink-900 hover:bg-ink-800 dark:hover:bg-white">
